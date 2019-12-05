@@ -1,0 +1,225 @@
+<div class="container">
+  <div class="row">
+    <header class="col-lg-12 col-md-12 col-sm-12">
+      <h1>Entradas</h1>
+    </header>
+  </div>
+  <section *ngIf="!display && !displayUp ">
+    <div class="row">
+      <div class="col-lg-12 col-md-2 my-1 right">
+        <button type="button" class="btn btn-outline-success" (click)="onDisplayClassification('e')" (click)="onDisplay()"><i class="fas fa-plus"></i> Adicionar</button>
+        <form class="form-inline search " #p="ngForm" (ngSubmit)="onSubmit(p)">
+            <input class="form-control mr-sm-2" type="search" name="search" placeholder="Buscar Pessoa" [(ngModel)]="procurarNome" aria-label="Buscar" ngModel>
+            &nbsp;<b class="p">Periodo: </b>&nbsp;<input type="date" name="competencia" class="form-control mr-sm-2" [(ngModel)]="procurardata">
+            &nbsp;<b class="p">Tipo: </b>&nbsp;<select name="tipo" ngModel class="form-control mr-sm-2" [(ngModel)]="procurarmov" name="type">
+              <option value="e">  Entrada  </option>
+              <option value="s">  Saida  </option>
+              <option selected value="">  Ambos  </option>
+            </select>
+          </form>
+      </div>
+    </div> 
+    <div class="row">
+      
+      <table class="table table-dark table-striped col-lg-12 col-md-12 col-sm-12 my-3">
+        <thead>
+          <tr>
+            <th scope="col" class="">Pessoa</th>
+            <th scope="col" class="">Tipo</th>
+            <th scope="col" class="">Periodo</th>
+            <th scope="col" class="">Valor</th>
+            <th scope="col" class="text-center">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of entradas | searcherP : procurarNome | searcherMovDate : procurardata |searcher_mov : procurarmov">
+            <td class="">{{ p.pessoa }}</td>
+            <td class="">{{ p.tipo==="e" ?"Entrada": "Saida" }}</td>
+            <td class="">{{ p.data | date:'dd/MM/yyyy':'UTC'}}</td>
+            <td class="">{{ p.valor.toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            }) }}</td>
+            <td class="text-center">
+              <div class="btn-group" role="group" aria-label="actions">
+                <button type="button" class="btn btn-outline-secondary-outline" data-toggle="modal" data-target="#see" (click)="select(p)"><i class="fas fa-eye"></i></button>
+                <button type="button" class="btn btn-outline-secondary-outline" (click)="select(p)" (click)="onDisplayUp()"><i class="fas fa-edit"></i></button>
+                <button type="button" class="btn btn-outline-secondary-outline" data-toggle="modal" data-target="#delete" (click)="select(p)"><i class="fas fa-trash-alt"></i></button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <!--Modal de Deletar Construções-->
+      <div class="modal fade" role="dialog" id="delete">
+        <div class="modal-dialog modal-md" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Excluir Entrada</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <p>Tem certeza que deseja excluir esta Entrada?</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline-danger" data-dismiss="modal" (click)="deleteEntry()">Excluir</button>
+              <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancelar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--Fim do Modal de Deletar Construções-->
+      <div class="modal fade" role="dialog" id="see" *ngIf="entra">
+          <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title textColor">Detalhes da 
+                  {{entra.tipo==="e" ?"Entrada": "Saida"}} de {{entra.pessoa}}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                  <p><b>Pessoa:</b> {{entra.pessoa}}</p>
+                  <p><b>Tipo:</b> {{entra.tipo==="e" ?"Entrada": "Saida"}}</p>
+                  <p><b>Periodo:</b> {{entra.data | date:'dd/MM/yyyy':'UTC'}}</p>
+                  <p><b>Valor:</b> {{entra.valor.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  })}}</p>
+                  <p><b>Descrição</b></p>
+                  <textarea readonly [(ngModel)]="entra.descricao"  class="form-control" required name="descricao" [ngClass]="{'border-danger': descricaoV}"
+                (change)="descricaoV = false" id="descricao" cols="120" rows="3" placeholder="descricao" ngModel
+                #descricao="ngModel"></textarea>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+              </div>
+            </div>
+           </div>
+        </div>
+    </div>
+  </section>
+  <section *ngIf="display">
+      <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-7 col-sm-12 my-6">
+          <div class="card text-white bg-dark">
+            <h4>Adicionar</h4>          
+              <form method="POST" #p="ngForm" (ngSubmit)="onSubmit(p)">
+                 
+                <div class="form-group col-lg-12 col-md-12 col-sm-12 left">
+                  *Nome
+                  <input type="text" class="form-control inline" required [ngClass]="{'border-danger': ownerValidation}" 
+                  (change)="ownerValidation = false" name="nome" ngModel #pessoa="ngModel" placeholder="Nome da Pessoa">
+                  <p *ngIf="ownerValidation" class="text-danger">*Preencha a Pessoa</p>
+                </div>
+
+                <div class="form-group my-3">
+                  *Tipo
+                  <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                    <label class="btn btn-type active" (click)="onDisplayClassification('e')">
+                      <input type="radio" name="classifation_type" autocomplete="off" /> Entrada
+                    </label>
+                    <label class="btn btn-type" (click)="onDisplayClassification('s')">
+                      <input type="radio" name="classifation_type"  autocomplete="off" /> Saida
+                    </label>
+                  </div>
+                </div>
+                
+                <div class="form-group col-lg-12 col-md-12 col-sm-12 left">
+                  *Preço
+                  <input type="number" class="form-control inline valueClass" required [ngClass]="{'border-danger': precoV}" (change)="precoV = false" id="valorme" ngModel #preco="ngModel" placeholder="Preço" name="preco">
+                  <p *ngIf="precoV"  class="text-danger">*Preencha o Preço</p>
+                </div>  
+
+                <div class="form-group col-lg-12 col-md-12 col-sm-12 left">
+                  *Data da {{displayClassification==="e" ?"Entrada": "Saida"}}
+                  <input type="date" name="competencia" required [ngClass]="{'border-danger': functionValidation}"
+                    (change)="functionValidation = false" class="form-control stock-input" ngModel #data="ngModel">
+                  <p *ngIf="functionValidation" class="text-danger">*Preencha a Competencia</p>
+                </div>
+  
+                <div class="form-group col-lg-12 col-md-12 col-sm-12 left">
+                  *Descricao
+                  <textarea class="form-control" required name="descricao" [ngClass]="{'border-danger': descricaoV}"
+                    (change)="descricaoV = false" id="descricao" cols="120" rows="3" placeholder="descrição" ngModel
+                    #descricao="ngModel"></textarea>
+                  <p *ngIf="descricaoV" class="text-danger">*Preencha a descrição</p>
+                </div>
+    
+                <button type="submit" class="btn btn-outline-success">
+                  <i class="fas fa-paper-plane"></i>
+                  Salvar
+                </button>
+              </form>
+            </div>
+          <button class="btn btn-light col-lg-2" (click)="onDisplay()">
+            <i class="fas fa-angle-left"></i>Voltar
+          </button>
+        </div>
+      </div>
+    </section>
+    <!--Fim do display de adição-->
+    <!--Display de edição-->
+<section *ngIf="displayUp">
+  <div class="row justify-content-center">
+    <div class="col-lg-7 col-md-7 col-sm-12 my-6">
+      <div class="card text-white bg-dark "*ngIf="entra">
+        <h4>Editar a Entrada de {{ entra.pessoa }}</h4>          
+          <form method="POST" #p="ngForm" (ngSubmit)="updateBuild(p)">
+            
+            <div class="form-group col-lg-12 col-md-12 col-sm-12 left">
+              *Nome
+              <input [(ngModel)]="entra.pessoa" type="text" class="form-control inline" required [ngClass]="{'border-danger': ownerValidation}" 
+              (change)="ownerValidation = false" name="nome" ngModel #pessoa="ngModel" placeholder="Nome da Pessoa">
+              <p *ngIf="ownerValidation" class="text-danger">*Preencha a Pessoa</p>
+            </div>
+
+            <div class="form-group my-3">
+              *Tipo
+              <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                <label [class.active]="radioResult==='e'" class="btn btn-type" (click)="onDisplayClassification('e')">
+                  <input type="radio" name="classifation_type" autocomplete="off" /> Entrada
+                </label>
+                <label [class.active]="radioResult==='s'" class="btn btn-type" (click)="onDisplayClassification('s')">
+                  <input type="radio" name="classifation_type"  autocomplete="off" /> Saida
+                </label>
+              </div>
+            </div>
+            
+            <div class="form-group col-lg-12 col-md-12 col-sm-12 left">
+              *Preço
+              <input [(ngModel)]="entra.valor" type="number" class="form-control inline valueClass" required [ngClass]="{'border-danger': precoV}" (change)="precoV = false" id="valorme" ngModel #preco="ngModel" placeholder="Preço" name="preco">
+              <p *ngIf="precoV"  class="text-danger">*Preencha o Preço</p>
+            </div>  
+
+            <div class="form-group col-lg-12 col-md-12 col-sm-12 left">
+              *Data da {{displayClassification==="e" ?"Entrada": "Saida"}}
+              <input [(ngModel)]="entra.data" type="date" name="competencia" required [ngClass]="{'border-danger': functionValidation}"
+                (change)="functionValidation = false" class="form-control stock-input" ngModel #data="ngModel">
+              <p *ngIf="functionValidation" class="text-danger">*Preencha a Competencia</p>
+            </div>
+
+            <div class="form-group col-lg-12 col-md-12 col-sm-12 left">
+              *Descricao
+              <textarea [(ngModel)]="entra.descricao" class="form-control" required name="descricao" [ngClass]="{'border-danger': descricaoV}"
+                (change)="descricaoV = false" id="descricao" cols="120" rows="3" placeholder="descrição" ngModel
+                #descricao="ngModel"></textarea>
+              <p *ngIf="descricaoV" class="text-danger">*Preencha a descrição</p>
+            </div>
+
+            <button type="submit" class="btn btn-outline-success">
+              <i class="fas fa-paper-plane"></i>
+              Salvar
+            </button>
+          </form>
+        </div>
+      <button class="btn btn-light col-lg-2" (click)="onDisplayUp()">
+        <i class="fas fa-angle-left"></i>Voltar
+      </button>
+    </div>
+  </div>
+</section>
+</div>  

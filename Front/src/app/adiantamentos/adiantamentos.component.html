@@ -1,0 +1,213 @@
+<div class="container">
+    <div class="row">
+      <header class="col-lg-12 col-md-12 col-sm-12">
+        <h1>Adiantamentos</h1>
+      </header>
+    </div>
+    <section *ngIf="!display && !displayUp ">
+      <div class="row">
+        <div class="col-lg-12 col-md-2 my-1 right">
+          <button type="button" class="btn btn-outline-success" (click)="onDisplay()"><i class="fas fa-plus"></i> Adicionar</button>
+          <form class="form-inline search" #p="ngForm" (ngSubmit)="onSubmit(p)">
+            <input class="form-control mr-sm-2" type="search" name="search" placeholder="Buscar Pessoa" [(ngModel)]="searchProduto" aria-label="Buscar" ngModel>
+            &nbsp;<b class="p">Dia: </b>&nbsp;<input type="date" name="competencia" class="form-control mr-sm-2" [(ngModel)]="procurardia">
+            &nbsp;<b class="p">Periodo: </b>&nbsp;<input type="date" name="competencia" class="form-control mr-sm-2" [(ngModel)]="procurardata">
+          </form>
+        </div>
+      </div> 
+      <div class="row">
+        <table class="table table-dark table-striped col-lg-12 col-md-12 col-sm-12 my-3">
+          <thead>
+            <tr>
+              <th scope="col" class="">Funcionario</th>
+              <th scope="col" class="">Função</th>
+              <th scope="col" class="">Salario</th>
+              <th scope="col" class="">Data</th>
+              <th scope="col" class="">Adiantamento</th>
+              <th scope="col" class="">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of adiantamento | searcherDateAdiantamento : procurardata | searcherDiaAdiantamento : procurardia | searcherNameD : searchProduto">
+              <td class="">{{ p.name }}</td>
+              <td class="">{{ p.function }}</td>
+              <td class="">{{ p.receive.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+              }) }}</td>
+              <td class="">{{ p.date | date:'dd/MM/yyyy':'UTC' }}</td>
+              <td class="text-center">{{ p.value.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+              }) }}</td>
+              <td class="">
+                <div class="btn-group" role="group" aria-label="actions">
+                  <button type="button" class="btn btn-outline-secondary-outline" data-toggle="modal" data-target="#see" (click)="select(p)"><i class="fas fa-eye"></i></button>
+                  <button type="button" class="btn btn-outline-secondary-outline" (click)="select(p)" (click)="onDisplayUp()"><i class="fas fa-edit"></i></button>
+                  <button type="button" class="btn btn-outline-secondary-outline" data-toggle="modal" data-target="#delete" (click)="select(p)"><i class="fas fa-trash-alt"></i></button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <!--Modal de Deletar Construções-->
+        <div class="modal fade" role="dialog" id="delete">
+          <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Excluir Adiantamento</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <p>Tem certeza que deseja excluir este Adiantamento?</p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-outline-danger" data-dismiss="modal" (click)="deleteEntry()">Excluir</button>
+                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancelar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!--Fim do Modal de Deletar Construções-->
+        <div class="modal fade" role="dialog" id="see" *ngIf="adiant">
+            <div class="modal-dialog modal-md" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title textColor">Detalhes do 
+                    adiantamento de {{adiant.name}}</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                    <p><b>Nome:</b> {{adiant.name}}</p>
+                    <p><b>Documento:</b> {{adiant.document}}</p>
+                    <p><b>Função:</b> {{adiant.function}}</p>
+                    <p><b>Salario:</b> {{adiant.receive.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                    })}}</p>
+                    <p><b>Data:</b> {{adiant.date | date:'dd/MM/yyyy':'UTC'}}</p>
+                    <p><b>Adiantamento:</b> {{adiant.value.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                    })}}</p>
+                    <p><b>Descrição</b></p>
+                    <textarea readonly [(ngModel)]="adiant.reason"  class="form-control" required name="descricao" [ngClass]="{'border-danger': descricaoV}"
+                  (change)="descricaoV = false" id="descricao" cols="120" rows="3" placeholder="descricao" ngModel
+                  #descricao="ngModel"></textarea>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                </div>
+              </div>
+             </div>
+          </div>
+      </div>
+    </section>
+    <section *ngIf="display">
+        <div class="row justify-content-center">
+          <div class="col-lg-7 col-md-7 col-sm-12 my-6">
+            <div class="card text-white bg-dark">
+              <h4>Adicionar</h4>          
+                <form method="POST" #p="ngForm" (ngSubmit)="onSubmit(p)">
+               
+                  <div class="form-group col-lg-12 my-3 col-md-12 col-sm-12 left">
+                    *Funcionario
+                    <select name="classificacao" class="btn btn-select" required [ngClass]="{'border-danger': id_workersV}" (change)="id_workersV = false" name="id_workers" ngModel #id="ngModel">
+                      <option value="" disabled selected>Selecione um Funcionario</option>
+                      <option *ngFor="let C of workers" value="{{C.id}}">
+                        {{C.name}}
+                      </option>
+                    </select>
+                    <p *ngIf="id_workersV" class="text-danger">*Selecione um Funcionario</p>
+                  </div>
+  
+                  <div class="form-group col-lg-12 col-md-12 col-sm-12 left">
+                    *Valor
+                    <input type="number" class="form-control inline valueClass" required [ngClass]="{'border-danger': precoV}" (change)="precoV = false" id="valorme" ngModel #value="ngModel" placeholder="Preço" name="preco">
+                    <p *ngIf="precoV" class="text-danger">*Preencha o Valor</p>
+                  </div>
+                  
+                  <div class="form-group col-lg-12 col-md-12 col-sm-12 left">
+                      *Data do Adiantamento
+                      <input type="date" name="competencia" required [ngClass]="{'border-danger': functionValidation}"
+                        (change)="functionValidation = false" class="form-control stock-input" ngModel #date="ngModel">
+                      <p *ngIf="functionValidation" class="text-danger">*Preencha a Data</p>
+                    </div>
+    
+                  <div class="form-group col-lg-12 col-md-12 col-sm-12 left">
+                    *Descricao
+                    <textarea class="form-control" required name="descricao" [ngClass]="{'border-danger': descricaoV}"
+                      (change)="descricaoV = false" id="descricao" cols="120" rows="3" placeholder="descrição" ngModel
+                      #reason="ngModel"></textarea>
+                    <p *ngIf="descricaoV" class="text-danger">*Preencha a descrição</p>
+                  </div>
+      
+                  <button type="submit" class="btn btn-outline-success">
+                    <i class="fas fa-paper-plane"></i>
+                    Salvar
+                  </button>
+                </form>
+              </div>
+            <button class="btn btn-light col-lg-2" (click)="onDisplay()">
+              <i class="fas fa-angle-left"></i>Voltar
+            </button>
+          </div>
+        </div>
+      </section>
+      <section *ngIf="displayUp">
+          <div class="row justify-content-center">
+            <div class="col-lg-7 col-md-7 col-sm-12 my-6">
+              <div class="card text-white bg-dark "*ngIf="adiantamento">
+                <h4>Editar o adiantamento de {{ adiant.name }}</h4>          
+                  <form method="POST" #p="ngForm" (ngSubmit)="updateBuild(p)">
+                    
+                  <div class="form-group col-lg-12 my-3 col-md-12 col-sm-12 left">
+                    *Funcionario
+                    <select [(ngModel)]="adiant.worker_id" name="classificacao" class="btn btn-select" required [ngClass]="{'border-danger': id_workersV}" (change)="id_workersV = false" name="id_workers" ngModel #id="ngModel">
+                      <option value="" disabled selected>Selecione um Funcionario</option>
+                      <option *ngFor="let C of workers" value="{{C.id}}">
+                        {{C.name}}
+                      </option>
+                    </select>
+                    <p *ngIf="id_workersV" class="text-danger">*Selecione um Funcionario</p>
+                  </div>
+  
+                  <div class="form-group col-lg-12 col-md-12 col-sm-12 left">
+                    *Valor
+                    <input [(ngModel)]="adiant.value" type="number" class="form-control inline valueClass" required [ngClass]="{'border-danger': precoV}" (change)="precoV = false" id="valorme" ngModel #value="ngModel" placeholder="Preço" name="preco">
+                    <p *ngIf="precoV" class="text-danger">*Preencha o Valor</p>
+                  </div>
+                  
+                  <div class="form-group col-lg-12 col-md-12 col-sm-12 left">
+                      *Data do Adiantamento
+                      <input [(ngModel)]="adiant.date" type="date" name="competencia" required [ngClass]="{'border-danger': functionValidation}"
+                        (change)="functionValidation = false" class="form-control stock-input" ngModel #date="ngModel">
+                      <p *ngIf="functionValidation" class="text-danger">*Preencha a Data</p>
+                    </div>
+    
+                  <div class="form-group col-lg-12 col-md-12 col-sm-12 left">
+                    *Descricao
+                    <textarea [(ngModel)]="adiant.reason" class="form-control" required name="descricao" [ngClass]="{'border-danger': descricaoV}"
+                      (change)="descricaoV = false" id="descricao" cols="120" rows="3" placeholder="descrição" ngModel
+                      #reason="ngModel"></textarea>
+                    <p *ngIf="descricaoV" class="text-danger">*Preencha a descrição</p>
+                  </div>
+      
+        
+                    <button type="submit" class="btn btn-outline-success">
+                      <i class="fas fa-paper-plane"></i>
+                      Salvar
+                    </button>
+                  </form>
+                </div>
+              <button class="btn btn-light col-lg-2" (click)="onDisplayUp()">
+                <i class="fas fa-angle-left"></i>Voltar
+              </button>
+            </div>
+          </div>
+        </section>
+</div>

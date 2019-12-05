@@ -1,0 +1,197 @@
+<div class="container">
+  <div class="row">
+    <header class="col-lg-12 col-md-12 col-sm-12">
+      <h1>Funcionarios</h1>
+    </header>
+  </div>
+  <section *ngIf="!display && !displayUp ">
+    <div class="row">
+      <div class="col-lg-12 col-md-2 my-1 right">
+        <button type="button" class="btn btn-outline-success" (click)="onDisplay()"><i class="fas fa-plus"></i> Adicionar</button>
+        <form class="form-inline search" #p="ngForm" (ngSubmit)="onSubmit(p)">
+          <input class="form-control mr-sm-2" type="search" name="search" placeholder="Buscar Funcionario" [(ngModel)]="procurarNome" aria-label="Buscar" ngModel>
+          <select name="tipo" class="form-control mr-sm-2" [(ngModel)]="procurarmov" name="type">
+            <option value="">  Todos  </option> 
+            <option value="Cozinheiro(a)">  Cozinheiro(a)  </option>
+            <option value="Ajudante de Cozinha">  Ajudante de Cozinha  </option>
+            <option value="Lavador(a) de louça">  Lavador(a) de louça  </option>
+            <option value="Garçon">  Garçon  </option>             
+            <option value="Caixa">  Caixa  </option>             
+            <option value="Garçon/Balança">  Garçon/Balança  </option>             
+            <option value="Garçon/Buffet">  Garçon/Buffet  </option>                       
+          </select>
+          <datalist id="colors"> 
+            <option value="">  Todos  </option> 
+            <option value="Cozinheiro(a)">  Cozinheiro(a)  </option>
+            <option value="Ajudante de Cozinha">  Ajudante de Cozinha  </option>
+            <option value="Lavador(a) de louça">  Lavador(a) de louça  </option>
+            <option value="Garçon">  Garçon  </option>             
+            <option value="Caixa">  Caixa  </option>             
+            <option value="Garçon/Balança">  Garçon/Balança  </option>             
+            <option value="Garçon/Buffet">  Garçon/Buffet  </option>             
+          </datalist> 
+        </form>
+      </div>
+    </div> 
+    <div class="row">
+      <table class="table table-dark table-striped col-lg-12 col-md-12 col-sm-12 my-3">
+        <thead>
+          <tr>
+            <th scope="col" class="">Nome</th>
+            <th scope="col" class="">Função</th>
+            <th scope="col" class="">Documento</th>
+            <th scope="col" class="">Salario</th>
+            <th scope="col" class="">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let w of workers | searcher : procurarNome | searcher_mov : procurarmov">
+            <td class="">{{ w.name }}</td>
+            <td class="">{{ w.function }}</td>
+            <td class="">{{ w.document }}</td>
+            <td class="">{{ w.receive.toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            }) }}</td>
+            <td class="">
+              <div class="btn-group" role="group" aria-label="actions">
+                <button type="button" class="btn btn-outline-secondary-outline" (click)="select(w)" (click)="onDisplayUp()"><i class="fas fa-edit"></i></button>
+                <button type="button" class="btn btn-outline-secondary-outline" data-toggle="modal" data-target="#delete" (click)="select(w)"><i class="fas fa-trash-alt"></i></button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <!--Modal de Deletar Construções-->
+      <div class="modal fade" role="dialog" id="delete">
+        <div class="modal-dialog modal-md" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Excluir Funcionario</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <p>Tem certeza que deseja excluir este funcionario?</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline-danger" data-dismiss="modal" (click)="deleteEntry()">Excluir</button>
+              <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancelar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--Fim do Modal de Deletar Construções-->
+    </div>
+  </section>
+<!--Display de adição de nova classificação-->
+<section *ngIf="display">
+  <div class="row justify-content-center">
+    <div class="col-lg-7 col-md-7 col-sm-12 my-6">
+      <div class="card text-white bg-dark">
+        <h4>Adicionar</h4>          
+          <form method="POST" #p="ngForm" (ngSubmit)="onSubmit(p)">
+             
+            <div class="form-group col-lg-12 col-md-12 col-sm-12 left">
+              *Nome
+              <input type="text" class="form-control inline" required [ngClass]="{'border-danger': ownerValidation}" (change)="ownerValidation = false" name="name" ngModel #name="ngModel" placeholder="Nome do Funcionario">
+              <p *ngIf="ownerValidation"  class="text-danger">*Preencha o Nome</p>
+            </div>
+
+            <div class="form-group col-lg-12 col-md-12 col-sm-12 left">
+              Tipo de Classificação
+              <select name="function" required [ngClass]="{'border-danger': functionValidation}" (change)="functionValidation = false" class="btn btn-select" ngModel #function="ngModel">
+                <option value="" disabled selected>Selecione a Função</option>
+                <option value="Cozinheiro(a)">  Cozinheiro(a)  </option>
+                <option value="Ajudante de Cozinha">  Ajudante de Cozinha  </option>
+                <option value="Lavador(a) de louça">  Lavador(a) de louça  </option>
+                <option value="Garçon">  Garçon  </option>
+                <option value="Caixa">  Caixa  </option>             
+                <option value="Garçon/Balança">  Garçon/Balança  </option>             
+                <option value="Garçon/Buffet">  Garçon/Buffet  </option>                  
+              </select>
+              <p *ngIf="functionValidation"  class="text-danger">*Escolha a função</p>
+            </div>
+            
+            <div class="form-group col-lg-12 col-md-12 col-sm-12 left">
+              *Documento
+              <input type="text" class="form-control inline" required [ngClass]="{'border-danger': documentValidation}" (change)="documentValidation = false" name="document" ngModel #document="ngModel" placeholder="Documento">
+              <p *ngIf="documentValidation"  class="text-danger">*Preencha o Documento</p>
+            </div>
+
+            <div class="form-group col-lg-12 col-md-12 col-sm-12 left">
+              *Salario
+              <input type="number" class="form-control inline valueClass" required [ngClass]="{'border-danger': receiveV}" (change)="receiveV = false" id="receive" ngModel #receive="ngModel" placeholder="Salario" name="receive">
+              <p *ngIf="receiveV"  class="text-danger">*Preencha o Salario</p>
+            </div>
+
+            <button type="submit" class="btn btn-outline-success">
+              <i class="fas fa-paper-plane"></i>
+              Salvar
+            </button>
+          </form>
+        </div>
+      <button class="btn btn-light col-lg-2" (click)="onDisplay()">
+        <i class="fas fa-angle-left"></i>Voltar
+      </button>
+    </div>
+  </div>
+</section>
+<!--Fim do display de adição-->
+<!--Display de edição-->
+<section *ngIf="displayUp">
+  <div class="row justify-content-center">
+    <div class="col-lg-7 col-md-7 col-sm-12 my-6">
+      <div class="card text-white bg-dark "*ngIf="work">
+        <h4>Editar o Funcionario: {{ work.name }}</h4>          
+          <form method="POST" #p="ngForm" (ngSubmit)="updateBuild(p)">
+             
+            <div class="form-group col-lg-12 col-md-12 col-sm-12 left">
+              *Nome
+              <input type="text" [(ngModel)]="work.name" class="form-control inline" required [ngClass]="{'border-danger': ownerValidation}" (change)="ownerValidation = false" name="name" ngModel #name="ngModel" placeholder="Nome do Funcionario">
+              <p *ngIf="ownerValidation"  class="text-danger">*Preencha o Nome</p>
+            </div>
+
+            <div class="form-group col-lg-12 col-md-12 col-sm-12 left">
+              Tipo de Classificação
+              <select name="function" [(ngModel)]="work.function" required [ngClass]="{'border-danger': functionValidation}" (change)="functionValidation = false" class="btn btn-select" ngModel #function="ngModel">
+                <option value="" disabled selected>Selecione a Função</option>
+                <option value="Cozinheiro(a)">  Cozinheiro(a)  </option>
+                <option value="Ajudante de Cozinha">  Ajudante de Cozinha  </option>
+                <option value="Lavador(a) de louça">  Lavador(a) de louça  </option>
+                <option value="Garçon">  Garçon  </option>
+                <option value="Caixa">  Caixa  </option>             
+                <option value="Garçon/Balança">  Garçon/Balança  </option>             
+                <option value="Garçon/Buffet">  Garçon/Buffet  </option>                  
+              </select>
+              <p *ngIf="functionValidation"  class="text-danger">*Escolha a função</p>
+            </div>
+            
+            <div class="form-group col-lg-12 col-md-12 col-sm-12 left">
+              *Documento
+              <input type="text" [(ngModel)]="work.document" class="form-control inline" required [ngClass]="{'border-danger': documentValidation}" (change)="documentValidation = false" name="document" ngModel #document="ngModel" placeholder="Documento">
+              <p *ngIf="documentValidation"  class="text-danger">*Preencha o Documento</p>
+            </div>
+
+            <div class="form-group col-lg-12 col-md-12 col-sm-12 left">
+              *Salario
+              <input type="number" [(ngModel)]="work.receive" class="form-control inline valueClass" required [ngClass]="{'border-danger': receiveV}" (change)="receiveV = false" id="receive" ngModel #receive="ngModel" placeholder="Salario" name="receive">
+              <p *ngIf="receiveV"  class="text-danger">*Preencha o Salario</p>
+            </div>
+            
+            <button type="submit" class="btn btn-outline-success">
+              <i class="fas fa-paper-plane"></i>
+              Salvar
+            </button>
+          </form>
+        </div>
+      <button class="btn btn-light col-lg-2" (click)="onDisplayUp()">
+        <i class="fas fa-angle-left"></i>Voltar
+      </button>
+    </div>
+  </div>
+</section>
+</div>
+<!--Fim do display de edição-->
+ 

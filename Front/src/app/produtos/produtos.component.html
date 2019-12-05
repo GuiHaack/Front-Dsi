@@ -1,0 +1,190 @@
+<div class="container">
+  <div class="row">
+    <header class="col-lg-12 col-md-12 col-sm-12">
+      <h1>Produtos</h1>
+    </header>
+  </div>
+  <section *ngIf="!display && !displayUp ">
+    <div class="row">
+      <div class="col-lg-12 col-md-2 my-1 right">
+        <button type="button" class="btn btn-outline-success" (click)="onDisplay()"><i class="fas fa-plus"></i> Adicionar</button>
+        <form class="form-inline search" #p="ngForm" (ngSubmit)="onSubmit(p)">
+          <input class="form-control mr-sm-2" type="search" name="search" placeholder="Buscar Produto" [(ngModel)]="searchProduto" aria-label="Buscar" ngModel>
+        </form>
+      </div>
+    </div> 
+    <div class="row">
+      <table class="table table-dark table-striped col-lg-12 col-md-12 col-sm-12 my-3">
+        <thead>
+          <tr>
+            <th scope="col" class="">Nome</th>
+            <th scope="col" class="">Preço</th>
+            <th scope="col" class="">Medida</th>
+            <th scope="col" class="">Valor Medida</th>
+            <th scope="col" class="">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of produtos | procurarProduto : searchProduto">
+            <td class="">{{ p.nome }}</td>
+            <td class="">{{ p.preco.toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            }) }}</td>
+            <td class="">{{ p.unmedida }}</td>
+            <td class="">{{ p.valmedida }}</td>
+            <td class="">
+              <div class="btn-group" role="group" aria-label="actions">
+                <button type="button" class="btn btn-outline-secondary-outline" (click)="select(p)" (click)="onDisplayUp()"><i class="fas fa-edit"></i></button>
+                <button type="button" class="btn btn-outline-secondary-outline" data-toggle="modal" data-target="#delete" (click)="select(p)"><i class="fas fa-trash-alt"></i></button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <!--Modal de Deletar Construções-->
+      <div class="modal fade" role="dialog" id="delete">
+        <div class="modal-dialog modal-md" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Excluir Produto</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <p>Tem certeza que deseja excluir este produto?</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline-danger" data-dismiss="modal" (click)="deleteEntry()">Excluir</button>
+              <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancelar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--Fim do Modal de Deletar Construções-->
+    </div>
+  </section>
+  <section *ngIf="display">
+    <div class="row justify-content-center">
+      <div class="col-lg-7 col-md-7 col-sm-12 my-6">
+        <div class="card text-white bg-dark">
+          <h4>Adicionar</h4>          
+            <form method="POST" #p="ngForm" (ngSubmit)="onSubmit(p)">
+               
+              <div class="form-group col-lg-12 col-md-12 col-sm-12 left">
+                *Nome
+                <input type="text" class="form-control inline" required [ngClass]="{'border-danger': ownerValidation}" (change)="ownerValidation = false" name="nome" ngModel #nome="ngModel" placeholder="Nome do Produto">
+                <p *ngIf="ownerValidation"  class="text-danger">*Preencha o Nome</p>
+              </div>
+
+              <div class="form-group col-lg-12 col-md-12 col-sm-12 left">
+                *Preço
+                <input type="number" class="form-control inline valueClass" required [ngClass]="{'border-danger': precoV}" (change)="precoV = false" id="valorme" ngModel #preco="ngModel" placeholder="Preço" name="preco">
+                <p *ngIf="precoV"  class="text-danger">*Preencha o Preço</p>
+              </div>
+  
+              <div class="form-group col-lg-12 col-md-12 col-sm-12 left">
+                Tipo de Medida
+                <select name="unmedida" required [ngClass]="{'border-danger': functionValidation}" (change)="functionValidation = false" class="btn btn-select" ngModel #unmedida="ngModel">
+                  <option value="" disabled selected>Selecione a Medida</option>
+                  <option value="KG">  KG  </option>
+                  <option value="ML">  ML  </option>
+                  <option value="Litro">  Litro  </option>
+                  <option value="Grama">  Grama  </option>
+                  <option value="Copo">  Copo  </option>             
+                  <option value="Pacote">  Pacote  </option>             
+                  <option value="Sacola">  Sacola  </option>                  
+                </select>
+                <p *ngIf="functionValidation"  class="text-danger">*Escolha a Medida</p>
+              </div>
+  
+              <div class="form-group col-lg-12 col-md-12 col-sm-12 left">
+                *Valor da Medida
+                <input type="number" class="form-control inline valueClass" required [ngClass]="{'border-danger': valormeV}" (change)="valormeV = false" id="valorme" ngModel #valmedida="ngModel" placeholder="Valor da medida" name="medida">
+                <p *ngIf="valormeV"  class="text-danger">*Preencha o valor da medida</p>
+              </div>
+
+              <div class="form-group col-lg-12 col-md-12 col-sm-12 left">
+                *Descricao
+                <textarea class="form-control" required name="descricao" [ngClass]="{'border-danger': descricaoV}"
+                  (change)="descricaoV = false" id="descricao" cols="120" rows="3" placeholder="descricao" ngModel
+                  #descricao="ngModel"></textarea>
+                <p *ngIf="descricaoV" class="text-danger">*Preencha a descrição</p>
+              </div>
+  
+              <button type="submit" class="btn btn-outline-success">
+                <i class="fas fa-paper-plane"></i>
+                Salvar
+              </button>
+            </form>
+          </div>
+        <button class="btn btn-light col-lg-2" (click)="onDisplay()">
+          <i class="fas fa-angle-left"></i>Voltar
+        </button>
+      </div>
+    </div>
+  </section>
+  <!--Fim do display de adição-->
+  <!--Display de edição-->
+<section *ngIf="displayUp">
+  <div class="row justify-content-center">
+    <div class="col-lg-7 col-md-7 col-sm-12 my-6">
+      <div class="card text-white bg-dark "*ngIf="prod">
+        <h4>Editar o Produto: {{ prod.nome }}</h4>          
+          <form method="POST" #p="ngForm" (ngSubmit)="updateBuild(p)">
+             
+            <div class="form-group col-lg-12 col-md-12 col-sm-12 left">
+              *Nome
+              <input [(ngModel)]="prod.nome"  type="text" class="form-control inline" required [ngClass]="{'border-danger': ownerValidation}" (change)="ownerValidation = false" name="nome" ngModel #nome="ngModel" placeholder="Nome do Produto">
+              <p *ngIf="ownerValidation"  class="text-danger">*Preencha o Nome</p>
+            </div>
+
+            <div class="form-group col-lg-12 col-md-12 col-sm-12 left">
+              *Preço
+              <input [(ngModel)]="prod.preco"  type="number" class="form-control inline valueClass" required [ngClass]="{'border-danger': precoV}" (change)="precoV = false" id="valorme" ngModel #preco="ngModel" placeholder="Preço" name="preco">
+              <p *ngIf="precoV"  class="text-danger">*Preencha o Preço</p>
+            </div>
+
+            <div class="form-group col-lg-12 col-md-12 col-sm-12 left">
+              Tipo de Medida
+              <select [(ngModel)]="prod.unmedida"  name="unmedida" required [ngClass]="{'border-danger': functionValidation}" (change)="functionValidation = false" class="btn btn-select" ngModel #unmedida="ngModel">
+                <option value="" disabled selected>Selecione a Medida</option>
+                <option value="KG">  KG  </option>
+                <option value="ML">  ML  </option>
+                <option value="Litro">  Litro  </option>
+                <option value="Grama">  Grama  </option>
+                <option value="Copo">  Copo  </option>             
+                <option value="Pacote">  Pacote  </option>             
+                <option value="Sacola">  Sacola  </option>                  
+              </select>
+              <p *ngIf="functionValidation"  class="text-danger">*Escolha a Medida</p>
+            </div>
+
+            <div class="form-group col-lg-12 col-md-12 col-sm-12 left">
+              *Valor da Medida
+              <input [(ngModel)]="prod.valmedida"  type="number" class="form-control inline valueClass" required [ngClass]="{'border-danger': valormeV}" (change)="valormeV = false" id="valorme" ngModel #valmedida="ngModel" placeholder="Valor da medida" name="medida">
+              <p *ngIf="valormeV"  class="text-danger">*Preencha o valor da medida</p>
+            </div>
+
+            <div class="form-group col-lg-12 col-md-12 col-sm-12 left">
+              *Descricao
+              <textarea [(ngModel)]="prod.descricao"  class="form-control" required name="descricao" [ngClass]="{'border-danger': descricaoV}"
+                (change)="descricaoV = false" id="descricao" cols="120" rows="3" placeholder="descricao" ngModel
+                #descricao="ngModel"></textarea>
+              <p *ngIf="descricaoV" class="text-danger">*Preencha a descrição</p>
+            </div>
+            
+            <button type="submit" class="btn btn-outline-success">
+              <i class="fas fa-paper-plane"></i>
+              Salvar
+            </button>
+          </form>
+        </div>
+      <button class="btn btn-light col-lg-2" (click)="onDisplayUp()">
+        <i class="fas fa-angle-left"></i>Voltar
+      </button>
+    </div>
+  </div>
+</section>
+<div>
